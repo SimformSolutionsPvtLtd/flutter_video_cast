@@ -121,6 +121,10 @@ class ChromeCastController(
                 removeSessionListener()
                 result.success(null)
             }
+            "chromeCast#stopCasting" -> {
+                sessionManager?.endCurrentSession(true)
+                result.success(null)
+            }
         }
     }
 

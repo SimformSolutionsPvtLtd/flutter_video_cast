@@ -80,6 +80,10 @@ abstract class ChromeCastPlatform {
     throw UnimplementedError('stop() has not been implemented.');
   }
 
+  Future<void> stopCasting({@required int id}) {
+    throw UnimplementedError('stopCasting() has not been implemented.');
+  }
+
   /// Returns `true` when a cast session is connected, `false` otherwise.
   Future<bool> isConnected({@required int id}) {
     throw UnimplementedError('seek() has not been implemented.');

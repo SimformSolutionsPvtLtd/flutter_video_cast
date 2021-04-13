@@ -9,7 +9,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        home: CastSample()
+        home: HomePage()
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: RaisedButton(
+        child: Text('Navigate'),
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => CastSample()));
+        },
+      ),
     );
   }
 }
@@ -44,7 +58,7 @@ class _CastSampleState extends State<CastSample> {
             color: Colors.white,
             onButtonCreated: _onButtonCreated,
             onSessionStarted: _onSessionStarted,
-            onSessionEnded: () => setState(() => _state = AppState.idle),
+            onSessionEnded: () {},
             onRequestCompleted: _onRequestCompleted,
             onRequestFailed: _onRequestFailed,
           ),
@@ -112,6 +126,7 @@ class _CastSampleState extends State<CastSample> {
   }
 
   Future<void> _onRequestCompleted() async {
+    print('_onRequestCompleted');
     final playing = await _controller.isPlaying();
     setState(() {
       _state = AppState.mediaLoaded;
@@ -120,8 +135,18 @@ class _CastSampleState extends State<CastSample> {
   }
 
   Future<void> _onRequestFailed(String error) async {
+    print('_onRequestFailed');
+
     setState(() => _state = AppState.error);
     print(error);
+  }
+
+  @override
+  void dispose() {
+    _controller.stop();
+    _controller.removeSessionListener();
+    _controller.stopCasting();
+    super.dispose();
   }
 }
 
