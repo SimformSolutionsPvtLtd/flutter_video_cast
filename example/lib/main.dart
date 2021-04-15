@@ -126,7 +126,6 @@ class _CastSampleState extends State<CastSample> {
   }
 
   Future<void> _onRequestCompleted() async {
-    print('_onRequestCompleted');
     final playing = await _controller.isPlaying();
     setState(() {
       _state = AppState.mediaLoaded;
@@ -135,8 +134,6 @@ class _CastSampleState extends State<CastSample> {
   }
 
   Future<void> _onRequestFailed(String error) async {
-    print('_onRequestFailed');
-
     setState(() => _state = AppState.error);
     print(error);
   }

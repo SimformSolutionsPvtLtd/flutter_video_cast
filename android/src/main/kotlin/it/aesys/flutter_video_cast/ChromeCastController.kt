@@ -9,6 +9,7 @@ import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.Session
 import com.google.android.gms.cast.framework.SessionManagerListener
+import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.api.PendingResult
 import com.google.android.gms.common.api.Status
 import io.flutter.plugin.common.BinaryMessenger
@@ -20,7 +21,7 @@ class ChromeCastController(
         messenger: BinaryMessenger,
         viewId: Int,
         context: Context?
-) : PlatformView, MethodChannel.MethodCallHandler, SessionManagerListener<Session>, PendingResult.StatusListener {
+) : PlatformView, MethodChannel.MethodCallHandler, SessionManagerListener<Session>, PendingResult.StatusListener, RemoteMediaClient.ProgressListener {
     private val channel = MethodChannel(messenger, "flutter_video_cast/chromeCast_$viewId")
     private val chromeCastButton = MediaRouteButton(ContextThemeWrapper(context, R.style.Theme_AppCompat_NoActionBar))
     private val sessionManager = CastContext.getSharedInstance()?.sessionManager
@@ -36,6 +37,7 @@ class ChromeCastController(
             val media = MediaInfo.Builder(url).build()
             val options = MediaLoadOptions.Builder().build()
             val request = sessionManager?.currentCastSession?.remoteMediaClient?.load(media, options)
+            sessionManager?.currentCastSession?.remoteMediaClient?.addProgressListener(this, 1000)
             request?.addStatusListener(this)
         }
     }
@@ -122,6 +124,7 @@ class ChromeCastController(
                 result.success(null)
             }
             "chromeCast#stopCasting" -> {
+                sessionManager?.currentCastSession?.remoteMediaClient?.removeProgressListener(this)
                 sessionManager?.endCurrentSession(true)
                 result.success(null)
             }
@@ -172,5 +175,12 @@ class ChromeCastController(
         if (status?.isSuccess == true) {
             channel.invokeMethod("chromeCast#requestDidComplete", null)
         }
+    }
+
+    override fun onProgressUpdated(progress: Long, duration: Long) {
+        val data = HashMap<String, String>()
+        data[DURATION] = duration.toString()
+        data[PROGRESS] = progress.toString()
+        channel.invokeMethod("chromeCast#getVideoProgress", data)
     }
 }

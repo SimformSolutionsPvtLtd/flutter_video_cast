@@ -8,7 +8,7 @@
 import Flutter
 import GoogleCast
 
-class ChromeCastController: NSObject, FlutterPlatformView {
+class ChromeCastController: NSObject, FlutterPlatformView, GCKRemoteMediaClientListener {
 
     // MARK: - Internal properties
 
@@ -104,6 +104,10 @@ class ChromeCastController: NSObject, FlutterPlatformView {
         case "chromeCast#removeSessionListener":
             removeSessionListener()
             result(nil)
+        case "chromeCast#stopCasting":
+            sessionManager.currentCastSession?.remoteMediaClient?.remove(self)
+            sessionManager.endSession()
+            result(nil)
         default:
             result(nil)
             break
@@ -122,8 +126,19 @@ class ChromeCastController: NSObject, FlutterPlatformView {
         if let request = sessionManager.currentCastSession?.remoteMediaClient?.loadMedia(mediaInformation) {
             request.delegate = self
         }
+        sessionManager.currentCastSession?.remoteMediaClient?.add(self)
     }
 
+    public func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaStatus: GCKMediaStatus?) {
+        if let mediaStatusPosition = mediaStatus?.streamPosition, let duration = mediaStatus?.mediaInformation?.streamDuration {
+             channel.invokeMethod("chromeCast#getVideoProgress", arguments: [
+                "position": String(mediaStatusPosition * 1000),
+                       "duration":  String(duration * 1000)
+                   ])
+        }
+       
+    }
+    
     private func play() {
         if let request = sessionManager.currentCastSession?.remoteMediaClient?.play() {
             request.delegate = self

@@ -57,6 +57,10 @@ class ChromeCastController {
     return _chromeCastPlatform.stopCasting(id: id);
   }
 
+  Stream<VideoProgress> getVideoProgress() {
+    return _chromeCastPlatform.progressStreamEvents;
+  }
+
   /// Returns `true` when a cast session is connected, `false` otherwise.
   Future<bool> isConnected() {
     return _chromeCastPlatform.isConnected(id: id);

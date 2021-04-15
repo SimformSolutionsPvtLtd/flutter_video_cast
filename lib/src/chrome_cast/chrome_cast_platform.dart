@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_video_cast/src/chrome_cast/chrome_cast_event.dart';
 import 'package:flutter_video_cast/src/chrome_cast/method_channel_chrome_cast.dart';
+import 'package:flutter_video_cast/src/chrome_cast/video_progress_model.dart';
 
 /// The interface that platform-specific implementations of `flutter_video_cast` must extend.
 abstract class ChromeCastPlatform {
@@ -11,6 +12,8 @@ abstract class ChromeCastPlatform {
   ///
   /// Defaults to [MethodChannelChromeCast].
   static get instance => _instance;
+
+  Stream<VideoProgress> get progressStreamEvents;
 
   /// Initializes the platform interface with [id].
   ///
