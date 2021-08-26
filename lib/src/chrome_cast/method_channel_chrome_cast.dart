@@ -12,11 +12,11 @@ import 'package:stream_transform/stream_transform.dart';
 class MethodChannelChromeCast extends ChromeCastPlatform {
   // Keep a collection of id -> channel
   // Every method call passes the int id
-  final Map<int, MethodChannel> _channels = {};
+  final Map<int, MethodChannel?> _channels = {};
 
   /// Accesses the MethodChannel associated to the passed id.
-  MethodChannel channel(int id) {
-    return _channels[id];
+  MethodChannel? channel(int? id) {
+    return _channels[id!];
   }
 
   // The controller we need to broadcast the different events coming
@@ -29,98 +29,97 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
   final _progressStreamController = StreamController<VideoProgress>.broadcast();
 
   // Returns a filtered view of the events in the _controller, by id.
-  Stream<ChromeCastEvent> _events(int id) =>
+  Stream<ChromeCastEvent> _events(int? id) =>
       _eventStreamController.stream.where((event) => event.id == id);
 
   @override
   Stream<VideoProgress> get progressStreamEvents =>
-  _progressStreamController.stream;
-
+      _progressStreamController.stream;
 
   @override
   Future<void> init(int id) {
-    MethodChannel channel;
+    MethodChannel? channel;
     if (!_channels.containsKey(id)) {
       channel = MethodChannel('flutter_video_cast/chromeCast_$id');
       channel.setMethodCallHandler((call) => _handleMethodCall(call, id));
       _channels[id] = channel;
     }
-    return channel.invokeMethod<void>('chromeCast#wait');
+    return channel!.invokeMethod<void>('chromeCast#wait');
   }
 
   @override
-  Future<void> addSessionListener({int id}) {
-    return channel(id).invokeMethod<void>('chromeCast#addSessionListener');
+  Future<void> addSessionListener({int? id}) {
+    return channel(id)!.invokeMethod<void>('chromeCast#addSessionListener');
   }
 
   @override
-  Future<void> removeSessionListener({int id}) {
-    return channel(id).invokeMethod<void>('chromeCast#removeSessionListener');
+  Future<void> removeSessionListener({int? id}) {
+    return channel(id)!.invokeMethod<void>('chromeCast#removeSessionListener');
   }
 
   @override
-  Stream<SessionStartedEvent> onSessionStarted({int id}) {
+  Stream<SessionStartedEvent> onSessionStarted({int? id}) {
     return _events(id).whereType<SessionStartedEvent>();
   }
 
   @override
-  Stream<SessionEndedEvent> onSessionEnded({int id}) {
+  Stream<SessionEndedEvent> onSessionEnded({int? id}) {
     return _events(id).whereType<SessionEndedEvent>();
   }
 
   @override
-  Stream<RequestDidCompleteEvent> onRequestCompleted({int id}) {
+  Stream<RequestDidCompleteEvent> onRequestCompleted({int? id}) {
     return _events(id).whereType<RequestDidCompleteEvent>();
   }
 
   @override
-  Stream<RequestDidFailEvent> onRequestFailed({int id}) {
+  Stream<RequestDidFailEvent> onRequestFailed({int? id}) {
     return _events(id).whereType<RequestDidFailEvent>();
   }
 
   @override
-  Future<void> loadMedia(String url, {@required int id}) {
+  Future<void> loadMedia(String url, {required int id}) {
     final Map<String, dynamic> args = {'url': url};
-    return channel(id).invokeMethod<void>('chromeCast#loadMedia', args);
+    return channel(id)!.invokeMethod<void>('chromeCast#loadMedia', args);
   }
 
   @override
-  Future<void> play({@required int id}) {
-    return channel(id).invokeMethod<void>('chromeCast#play');
+  Future<void> play({required int id}) {
+    return channel(id)!.invokeMethod<void>('chromeCast#play');
   }
 
   @override
-  Future<void> pause({@required int id}) {
-    return channel(id).invokeMethod<void>('chromeCast#pause');
+  Future<void> pause({required int id}) {
+    return channel(id)!.invokeMethod<void>('chromeCast#pause');
   }
 
   @override
-  Future<void> seek(bool relative, double interval, {@required int id}) {
+  Future<void> seek(bool relative, double interval, {required int id}) {
     final Map<String, dynamic> args = {
       'relative': relative,
       'interval': interval
     };
-    return channel(id).invokeMethod<void>('chromeCast#seek', args);
+    return channel(id)!.invokeMethod<void>('chromeCast#seek', args);
   }
 
   @override
-  Future<void> stop({int id}) {
-    return channel(id).invokeMethod<void>('chromeCast#stop');
+  Future<void> stop({int? id}) {
+    return channel(id)!.invokeMethod<void>('chromeCast#stop');
   }
 
   @override
-  Future<void> stopCasting({int id}) {
-    return channel(id).invokeMethod<void>('chromeCast#stopCasting');
+  Future<void> stopCasting({int? id}) {
+    return channel(id)!.invokeMethod<void>('chromeCast#stopCasting');
   }
 
   @override
-  Future<bool> isConnected({@required int id}) {
-    return channel(id).invokeMethod<bool>('chromeCast#isConnected');
+  Future<bool?> isConnected({required int id}) {
+    return channel(id)!.invokeMethod<bool>('chromeCast#isConnected');
   }
 
   @override
-  Future<bool> isPlaying({@required int id}) {
-    return channel(id).invokeMethod<bool>('chromeCast#isPlaying');
+  Future<bool?> isPlaying({required int id}) {
+    return channel(id)!.invokeMethod<bool>('chromeCast#isPlaying');
   }
 
   Future<dynamic> _handleMethodCall(MethodCall call, int id) async {
@@ -139,8 +138,8 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
             .add(RequestDidFailEvent(id, call.arguments['error']));
         break;
       case 'chromeCast#getVideoProgress':
-        var progress = VideoProgress.fromJson(call.arguments.cast<String,String>());
-        _progressStreamController.sink.add(VideoProgress.fromJson(call.arguments.cast<String,String>()));
+        _progressStreamController.sink
+            .add(VideoProgress.fromJson(call.arguments.cast<String, String>()));
         break;
       default:
         throw MissingPluginException();
