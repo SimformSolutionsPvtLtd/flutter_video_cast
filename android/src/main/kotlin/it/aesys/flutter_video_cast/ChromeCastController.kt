@@ -180,7 +180,7 @@ class ChromeCastController(
     override fun onProgressUpdated(progress: Long, duration: Long) {
         val data = HashMap<String, String>()
         data[DURATION] = duration.toString()
-        data[PROGRESS] = progress.toString()
+        data[POSITION] = progress.toString()
         channel.invokeMethod("chromeCast#getVideoProgress", data)
     }
 }
