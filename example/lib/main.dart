@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: RaisedButton(
+      child: ElevatedButton(
         child: Text('Navigate'),
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (context) => CastSample()));
@@ -36,7 +36,7 @@ class CastSample extends StatefulWidget {
 }
 
 class _CastSampleState extends State<CastSample> {
-  ChromeCastController _controller;
+  ChromeCastController? _controller;
   AppState _state = AppState.idle;
   bool _playing = false;
 
@@ -60,7 +60,7 @@ class _CastSampleState extends State<CastSample> {
             onSessionStarted: _onSessionStarted,
             onSessionEnded: () {},
             onRequestCompleted: _onRequestCompleted,
-            onRequestFailed: _onRequestFailed,
+            onRequestFailed: (value) => _onRequestFailed(value ??''),
           ),
         ],
       ),
@@ -89,7 +89,7 @@ class _CastSampleState extends State<CastSample> {
       children: <Widget>[
         _RoundIconButton(
           icon: Icons.replay_10,
-          onPressed: () => _controller.seek(relative: true, interval: -10.0),
+          onPressed: () => _controller?.seek(relative: true, interval: -10.0),
         ),
         _RoundIconButton(
             icon: _playing
@@ -99,38 +99,38 @@ class _CastSampleState extends State<CastSample> {
         ),
         _RoundIconButton(
           icon: Icons.forward_10,
-          onPressed: () => _controller.seek(relative: true, interval: 10.0),
+          onPressed: () => _controller?.seek(relative: true, interval: 10.0),
         )
       ],
     );
   }
 
   Future<void> _playPause() async {
-    final playing = await _controller.isPlaying();
-    if(playing) {
-      await _controller.pause();
+    final playing = await _controller?.isPlaying();
+    if(playing ?? false) {
+      await _controller?.pause();
     } else {
-      await _controller.play();
+      await _controller?.play();
     }
-    setState(() => _playing = !playing);
+    setState(() => _playing = !(playing ?? false));
   }
 
   Future<void> _onButtonCreated(ChromeCastController controller) async {
     _controller = controller;
-    await _controller.addSessionListener();
+    await _controller?.addSessionListener();
   }
 
   Future<void> _onSessionStarted() async {
     setState(() => _state = AppState.connected);
 
-    await _controller.loadMedia('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
+    await _controller?.loadMedia('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
   }
 
   Future<void> _onRequestCompleted() async {
-    final playing = await _controller.isPlaying();
+    final playing = await _controller?.isPlaying();
     setState(() {
       _state = AppState.mediaLoaded;
-      _playing = playing;
+      _playing = playing ?? false;
     });
   }
 
@@ -141,9 +141,9 @@ class _CastSampleState extends State<CastSample> {
 
   @override
   void dispose() {
-    _controller.stop();
-    _controller.removeSessionListener();
-    _controller.stopCasting();
+    _controller?.stop();
+    _controller?.removeSessionListener();
+    _controller?.stopCasting();
     super.dispose();
   }
 }
@@ -153,21 +153,23 @@ class _RoundIconButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   _RoundIconButton({
-    @required this.icon,
-    @required this.onPressed
+    required this.icon,
+    required this.onPressed
   });
 
   @override
   Widget build(BuildContext context) {
-    return RaisedButton(
-        child: Icon(
-            icon,
-            color: Colors.white
+    return Container(
+        child: InkWell(
+          onTap: onPressed,
+          child: Icon(
+              icon,
+              color: Colors.white
+          ),
         ),
         padding: EdgeInsets.all(16.0),
         color: Colors.blue,
-        shape: CircleBorder(),
-        onPressed: onPressed
+
     );
   }
 }
