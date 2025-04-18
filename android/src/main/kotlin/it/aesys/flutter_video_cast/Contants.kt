@@ -1,4 +1,4 @@
 package it.aesys.flutter_video_cast
 
-const val DURATION = "duration"
-const val POSITION = "position"
+public const val DURATION = "duration"
+public const val POSITION = "position"

@@ -17,7 +17,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
 
-class ChromeCastController(
+public class ChromeCastController(
         messenger: BinaryMessenger,
         viewId: Int,
         context: Context?
